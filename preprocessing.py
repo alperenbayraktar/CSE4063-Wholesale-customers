@@ -8,3 +8,4 @@ class PreProcessing:
 
     def convert_categorical(self,df, column, bins, labels):
         df[column] = pd.cut(df[column], bins=bins, labels=labels)
+        return df
