@@ -31,27 +31,27 @@ def get_visual_data():
     sns.catplot(x="Region",kind='count',data=df)
     #plt.show()
 
-    pp.convert_categorical(df,"Fresh",[0,12000,24000,36000,120000],['FRE1','FRE2','FRE3','FRE4'])
+    pp.convert_categorical(df,"Fresh",[0,12000,24000,36000,120000],['fre_very_low', 'fre_low','fre_medium','fre_high'])
     sns.catplot(x="Fresh",kind='count',data=df)
     #plt.show()
 
-    pp.convert_categorical(df,"Milk",[0,2000,4000,8000,100000],['M1','M2','M3','M4'])
+    pp.convert_categorical(df,"Milk",[0,2000,4000,8000,100000],['m_very_low', 'm_low','m_medium','m_high'])
     sns.catplot(x="Milk",kind='count',data=df)
     #plt.show()
 
-    pp.convert_categorical(df,"Grocery",[0,2000,4000,8000,100000],['G1','G2','G3','G4'])
+    pp.convert_categorical(df,"Grocery",[0,2000,4000,8000,100000],['g_very_low', 'g_low','g_medium','g_high'])
     sns.catplot(x="Grocery",kind='count',data=df)
     #plt.show()
 
-    pp.convert_categorical(df,"Frozen",[0,2000,4000,8000,100000],['FRO1','FRO2','FRO3','FRO4'])
+    pp.convert_categorical(df,"Frozen",[0,2000,4000,8000,100000],['fro_very_low', 'fro_low','fro_medium','fro_high'])
     sns.catplot(x="Frozen",kind='count',data=df)
     #plt.show()
 
-    pp.convert_categorical(df,"Detergents_Paper",[0,1000,2500,5000,50000],['DP1','DP2','DP3','DP4'])
+    pp.convert_categorical(df,"Detergents_Paper",[0,1000,2500,5000,50000],['dp_very_low', 'dp_low','dp_medium','dp_high'])
     sns.catplot(x="Detergents_Paper",kind='count',data=df)
     #plt.show()
 
-    pp.convert_categorical(df,"Delicassen",[0,1000,2500,5000,50000],['D1','D2','D3','D4'])
+    pp.convert_categorical(df,"Delicassen",[0,1000,2500,5000,50000],['d_very_low', 'd_low','d_medium','_high'])
     sns.catplot(x="Delicassen",kind='count',data=df)
     #plt.show()
 
@@ -59,19 +59,27 @@ def get_visual_data():
 get_visual_data()
 
 from mlxtend.preprocessing import TransactionEncoder
-#from mlxtend.frequent_patterns import apriori
-from apyori import apriori
-#te = TransactionEncoder()
+from mlxtend.frequent_patterns import apriori, fpgrowth
+#from apyori import apriori
+te = TransactionEncoder()
+#df = df.drop(['Channel'], axis=1)
+te_ary = te.fit(df.to_numpy()).transform(df.to_numpy())
+df = pd.DataFrame(te_ary, columns=te.columns_)
+frequent_itemsets_apriori = apriori(df, min_support=0.00001, use_colnames=True)
 
-#te_ary = te.fit(df.to_numpy()).transform(df.to_numpy())
-#df = pd.DataFrame(te_ary, columns=te.columns_)
-#
-##print(df)frequent_itemsets = apriori(df, min_support=0.3, use_colna4es=True)
-#
-#frequent_itemsets['length'] = frequent_itemsets['itemsets'].apply(lambda x: len(x))
-records = []
-for i in range(0, 439):
-    records.append([str(df.values[i, j]) for j in range(0, 7)])
-association_rules = apriori(records, min_support=0.1, min_confidence=0.2, min_lift=3, min_length=4)
-association_results = list(association_rules)
-print(association_results)
+frequent_itemsets_apriori['length'] = frequent_itemsets_apriori['itemsets'].apply(lambda x: len(x))
+frequent_itemsets_apriori = frequent_itemsets_apriori[~(frequent_itemsets_apriori['length'] <= 2)]
+frequent_itemsets_apriori.to_csv('apriori_result.csv')
+print(frequent_itemsets_apriori)
+frequent_itemsets_fpgrowth = fpgrowth(df, min_support=0.00001, use_colnames=True)
+
+frequent_itemsets_fpgrowth['length'] = frequent_itemsets_fpgrowth['itemsets'].apply(lambda x: len(x))
+frequent_itemsets_fpgrowth = frequent_itemsets_fpgrowth[~(frequent_itemsets_fpgrowth['length'] <= 2)]
+frequent_itemsets_fpgrowth.to_csv('apriori_result.csv')
+print(frequent_itemsets_fpgrowth)
+#records = []
+#for i in range(0, 439):
+#    records.append([str(df.values[i, j]) for j in range(0, 7)])
+#association_rules = apriori(records, min_support=0.1, min_confidence=0.2, min_lift=3, min_length=1)
+#association_results = list(association_rulesd)
+#print(association_results)
